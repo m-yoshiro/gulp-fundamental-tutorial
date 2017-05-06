@@ -3,6 +3,13 @@
 // Gulpを読み込む
 const gulp = require('gulp');
 const sass = require('gulp-sass');
+const path = require('path');
+
+// src,distディレクトリをまとめて管理
+const PATHS = {
+  src: path.join(__dirname, 'src'),
+  dist: path.join(__dirname, 'dist'),
+};
 
 // sassでcssをbuildするタスク
 // 名前は自由に設定できる.

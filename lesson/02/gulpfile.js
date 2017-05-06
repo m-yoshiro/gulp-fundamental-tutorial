@@ -11,6 +11,11 @@ const PATHS = {
   dist: path.join(__dirname, 'dist'),
 };
 
+// dirnameの役割を示すためのテスト
+gulp.task('test:dirname', function () {
+  console.log('dirname is' + __dirname);
+})
+
 // sassでcssをbuildするタスク
 // 名前は自由に設定できる.
 // ただし、sassなどのツール名ではなくタスクの役割を表現する名前が好ましい。

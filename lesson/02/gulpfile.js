@@ -17,6 +17,10 @@ gulp.task('styles', function() {
     .pipe(gulp.dest('./dist/styles')); // => distディレクトリが無い場合はgulpが作成してbuildファイルを吐き出す
 });
 
+gulp.task('watch', function() {
+  gulp.watch('./src/styles/**/*.scss', ['styles']);
+});
+
 // 実行するとコンソールに`Hellow Gulp!`と表示させるタスクを書いた
 // `default`は特別なタスク。task名を指定せずに実行した場合はdefaultが呼び出される
 gulp.task('default', function() {

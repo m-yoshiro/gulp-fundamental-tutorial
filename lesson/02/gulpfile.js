@@ -29,7 +29,7 @@ gulp.task('styles', function() {
     .pipe(gulp.dest('./dist/styles')); // => distディレクトリが無い場合はgulpが作成してbuildファイルを吐き出す
 });
 
-gulp.task('watch', function() {
+gulp.task('watch', ['styles'], function() {
   gulp.watch('./src/styles/**/*.scss', ['styles']);
 });
 

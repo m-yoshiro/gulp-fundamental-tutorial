@@ -4,8 +4,11 @@
 
 - ファイルの変更を監視して自動でtaskを実行する
 - sass以外のtaskを追加してみよう
-   - HTMLテンプレートエンジンnunjacsを使ってhtmlを作ってみる
+   - stylelint
+   - autoprefixer
 - ローカルサーバーを起動する
+   - Browsersync
+- HTMLテンプレートエンジンnunjacsを使ってhtmlを作ってみる
 
 ## ファイルの変更を監視して自動でtaskを実行する
 

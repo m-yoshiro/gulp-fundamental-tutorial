@@ -16,6 +16,11 @@
 [lesson/02](lesson/02)
 
 - ファイルの変更を監視して自動でtaskを実行する
-- sass以外のtaskを追加してみよう
-   - HTMLテンプレートエンジンnunjacsを使ってhtmlを作ってみる
 - ローカルサーバーの起動
+
+### Lesson 3
+
+- sass以外のtaskを追加してみよう
+   - stylelint
+   - autoprefixer
+- HTMLテンプレートエンジンnunjacsを使ってhtmlを作ってみる

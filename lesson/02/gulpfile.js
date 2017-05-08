@@ -11,30 +11,21 @@ const PATHS = {
   dist: path.join(__dirname, 'dist'),
 };
 
-// dirnameの役割を示すためのテスト
+// dirnameの役割を示すためのテス
 gulp.task('test:dirname', function () {
   console.log('dirname is' + __dirname);
 })
 
-// sassでcssをbuildするタスク
-// 名前は自由に設定できる.
-// ただし、sassなどのツール名ではなくタスクの役割を表現する名前が好ましい。
 gulp.task('styles', function() {
-  /*
-    @gulp.src: 素材となるファイルのパス
-    @gulp.dest: build後にファイルを吐き出すディレクトリのパス
-  */
-  return gulp.src('./src/styles/**/*.scss') // => src/styles以下にある名前が'.scss'で終わる全てのファイル
-    .pipe(sass().on('error', sass.logError)) // on('error', '...')はエラーの原因を教えてくれる
-    .pipe(gulp.dest('./dist/styles')); // => distディレクトリが無い場合はgulpが作成してbuildファイルを吐き出す
+  return gulp.src(`${PATHS.src}/styles/**/*.scss`)
+    .pipe(sass().on('error', sass.logError))
+    .pipe(gulp.dest(`${PATHS.dist}/styles`));
 });
 
 gulp.task('watch', ['styles'], function() {
-  gulp.watch('./src/styles/**/*.scss', ['styles']);
+  gulp.watch(`${PATHS.src}/styles/**/*.scss`, ['styles']);
 });
 
-// 実行するとコンソールに`Hellow Gulp!`と表示させるタスクを書いた
-// `default`は特別なタスク。task名を指定せずに実行した場合はdefaultが呼び出される
 gulp.task('default', function() {
   console.log('Hellow Gulp!');
 });

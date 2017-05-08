@@ -64,4 +64,85 @@ https://github.com/gulpjs/gulp/blob/master/docs/API.md#gulpwatchglob--opts-tasks
     });
    ```
 
-## sass以外のtaskを追加してみよう
+## ディレクトリ管理を一箇所にまとめよう
+
+styles, watchの二箇所のタスクで同じファイルパスを指定しました。
+タスクが増えていくと、ファイルパスを指定する機会も増えて行きます。
+都度、ベタがきしていくのは面倒。
+
+なので連想配列(もしくはjsではオブジェクトと呼ばれる)にまとめちゃいます。
+
+1. モジュール`path`をrequirする
+   ファイルパスの参照に便利な機能を持ったツールです。
+   node.jsに標準で備わっています。
+
+    ```js
+    const gulp = require('gulp');
+    const sass = require('gulp-sass');
+    // こいつを追加
+    const path = require('path');
+    ```
+
+1. ファイル管理のための変数 `PATHS` を定義
+
+    ```js
+    const PATHS = {};
+
+    // 📝 複数のパスを管理するので複数形で表しています。
+    // 欧米圏だと単数・複数形の違いはとても重要なようで,
+    // 実際に同一単語の単数・複数が機能によって使い分けられてるケースは少なくないです。
+    // 慣れておくと今後良いです。
+    ```
+
+1. `path`モジュールと`__dirname`を持ちいてファイルパスを指定する
+   今回は読み込み元と出力先の2つのパスを指定します。
+
+    ```js
+    // `__dirname`はnodejsの特別な変数で、実行中の環境での絶対パスを表します。
+    // `path.join()`は()内に記されたディレクトリ名を連結して一つのパスを表します。
+
+    const PATHS = {
+      src: path.join(__dirname, 'src'),
+      dist: path.join(__dirname, 'dist'),
+    }
+
+    // 📝 dirnameの役割を示すためのテスト
+    // `gulp test:dirname` でdirnameの中のファイルパスが確認できます
+    gulp.task('test:dirname', function () {
+      console.log('dirname is' + __dirname);
+    })
+    ```
+
+1. `PATHS`をタスクに適用してみる
+   ここはオシャレにES6の記法を使っちゃいます。
+
+    ```js
+    gulp.task('styles', function() {
+      return gulp.src(`${PATHS.src}/styles/**/*.scss`)
+        .pipe(sass().on('error', sass.logError))
+        .pipe(gulp.dest(`${PATHS.dist}/styles`));
+    });
+
+    gulp.task('watch', ['styles'], function() {
+      gulp.watch(`${PATHS.src}/styles/**/*.scss`, ['styles']);
+    });
+
+    // 📝 古い記事の場合は下のような書き方をよくみます。
+    gulp.src(path.join(PATHS.src, '/styles/**/*.scss'))
+    ```
+
+## ローカルサーバーを起動する
+
+本レッスンの最後はローカルサーバーの起動です。
+Gulp等のタスクランナーが面白い！と感じてもらうために
+Browsersyncを使ってみます。
+Browsersyncを使うと、ローカルサーバーだけでなく、
+変更ごとにブラウザの自動リロードや、
+あるページを複数のブラウザで開いた場合に、
+一つの画面での変更が他画面でも同期されます。
+
+1. Browsersyncをインストール
+
+    ```sh
+    $ yarn add -D browser-sync
+    ```

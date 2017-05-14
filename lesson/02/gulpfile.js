@@ -18,14 +18,14 @@ gulp.task('test:dirname', function () {
 })
 
 gulp.task('styles', function() {
-  return gulp.src(`${PATHS.src}/styles/**/*.scss`)
+  return gulp.src(path.join(PATHS.src, 'styles', '**/*.scss'))
     .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest(`${PATHS.dist}/styles`))
+    .pipe(gulp.dest(path.join(PATHS.dist, 'styles')))
     .pipe(browserSync.stream());
 });
 
 gulp.task('watch', ['styles'], function() {
-  gulp.watch(`${PATHS.src}/styles/**/*.scss`, 'styles');
+  gulp.watch(path.join(PATHS.src, 'styles', '**/*.scss'), 'styles');
 });
 
 // Static Server
@@ -38,9 +38,9 @@ gulp.task('serve', ['styles'], function() {
   });
 
   // watchタスクと全く同じ
-  gulp.watch(`${PATHS.src}/styles/**/*.scss`, ['styles']);
+  gulp.watch(path.join(PATHS.src, 'styles', '**/*.scss'), ['styles']);
   // htmlが`change`された時にページをリロードする
-  gulp.watch(path.resolve(__dirname, '*.html')).on('change', browserSync.reload);
+  gulp.watch(path.join(__dirname, '*.html')).on('change', browserSync.reload);
 });
 
 gulp.task('default', function() {

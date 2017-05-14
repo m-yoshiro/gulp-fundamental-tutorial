@@ -9,14 +9,15 @@
 
 ## ファイルの変更を監視して自動でtaskを実行する
 
-Gulpの標準機能である`gulp.watch`で、ファイルの変更(*)を監視できます。
-これを利用すると、ファイルが変更されたタイミングに任意のタスクを自動で
+Gulpの標準機能である`gulp.watch`を使います。
+これを利用すると、ファイルが変更(*)されたタイミングに任意のタスクを自動で
 実行することが可能となります。
 
-gulp.watchドキュメント  
-https://github.com/gulpjs/gulp/blob/master/docs/API.md#gulpwatchglob--opts-tasks-or-gulpwatchglob--opts-cb
+📝 ファイルの変更: ここでは、「エディタで保存されたタイミング」と考えてください
 
-(*) ファイルの変更: エディタで保存されたタイミングと捉えていただいて良いかと
+gulp.watchドキュメント  
+
+https://github.com/gulpjs/gulp/blob/master/docs/API.md#gulpwatchglob--opts-tasks-or-gulpwatchglob--opts-cb
 
 ### 準備
 
@@ -56,7 +57,7 @@ https://github.com/gulpjs/gulp/blob/master/docs/API.md#gulpwatchglob--opts-tasks
 1. おまけ: `gulp watch`実行時に1度`styles`タスクを実行させる
    今のままでは、watchタスク実行してもファイルが変更されるまで`styles`タスクが実行されません。
    functionの前に `['styles']` を追加すると  
-   watch実行後すぐに`styles`タスクが実行されます。（解説は後ほど）
+   watch実行後すぐに`styles`タスクが実行されます。
 
    ```js
     gulp.task('watch', ['styles'], function () {
@@ -66,11 +67,13 @@ https://github.com/gulpjs/gulp/blob/master/docs/API.md#gulpwatchglob--opts-tasks
 
 ## ディレクトリ管理を一箇所にまとめよう
 
-styles, watchの二箇所のタスクで同じファイルパスを指定しました。
-タスクが増えていくと、ファイルパスを指定する機会も増えて行きます。
-都度、ベタがきしていくのは面倒。
+読み込み元・書き出し先の二つのディレクトリを
+一箇所で管理しましょう。
 
-なので連想配列(もしくはjsではオブジェクトと呼ばれる)にまとめちゃいます。
+こうしておくと、読み込み元のディレクトリを変更したい場合、
+ディレクトリ管理する一箇所のみを修正すれば対応できるようになります。
+
+ここでは、連想配列を利用します。
 
 1. モジュール`path`をrequirする
    ファイルパスの参照に便利な機能を持ったツールです。
@@ -88,7 +91,7 @@ styles, watchの二箇所のタスクで同じファイルパスを指定しま�
     ```js
     const PATHS = {};
 
-    // 📝 複数のパスを管理するので複数形で表しています。
+    // 📝 複数のパスを管理するので変数名を複数形で表しています。
     // 欧米圏だと単数・複数形の違いはとても重要なようで,
     // 実際に同一単語の単数・複数が機能によって使い分けられてるケースは少なくないです。
     // 慣れておくと今後良いです。
@@ -117,9 +120,9 @@ styles, watchの二箇所のタスクで同じファイルパスを指定しま�
 
     ```js
     gulp.task('styles', function() {
-      return gulp.src(path.join(PATHS.src, 'styles/**/*.scss'))
+      return gulp.src(path.join(PATHS.src, 'styles', '**/*.scss'))
         .pipe(sass().on('error', sass.logError))
-        .pipe(gulp.dest(`${PATHS.dist}/styles`));
+        .pipe(path.join(PATHS.dist, 'styles'));
     });
 
     gulp.task('watch', ['styles'], function() {
@@ -181,7 +184,7 @@ https://www.browsersync.io/docs/gulp
     });
     ```
 
-### `gulp serve` を実行しましょう！  
+### 実行しましょう！  
 
 サーバーが起動したらブラウザが自動で立ち上がります。
 htmlを変更すると自動でリロードされます。
@@ -204,7 +207,7 @@ htmlを変更すると自動でリロードされます。
     [BS] Serving files from: ./
     ```
 
-### 'scss'の変更時にも自動リロードを行うようにする
+### html以外の変更でも自動リロードを実行する
 
 1. serveタスクの実行前に`styles`タスクを実行するようにする
 1. `styles`タスク内にbrowserSyncのリロード用のコードを追加する
@@ -220,7 +223,7 @@ htmlを変更すると自動でリロードされます。
       });
 
     +  // watchタスクと全く同じ
-    +  gulp.watch(`${PATHS.src}/styles/**/*.scss`, ['styles']);
+    +  gulp.watch(path.join(PATHS.src, 'styles', '**/*.scss'), ['styles']);
       // htmlが`change`された時にページをリロードする
       gulp.watch(path.resolve(__dirname, '*.html')).on('change', browserSync.reload);
     });

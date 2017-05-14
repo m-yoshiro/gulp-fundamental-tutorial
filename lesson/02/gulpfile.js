@@ -17,13 +17,13 @@ gulp.task('test:dirname', function () {
 })
 
 gulp.task('styles', function() {
-  return gulp.src(`${PATHS.src}/styles/**/*.scss`)
+  return gulp.src(path.join(PATHS.src, 'styles/**/*.scss'))
     .pipe(sass().on('error', sass.logError))
     .pipe(gulp.dest(`${PATHS.dist}/styles`));
 });
 
 gulp.task('watch', ['styles'], function() {
-  gulp.watch(`${PATHS.src}/styles/**/*.scss`, ['styles']);
+  gulp.watch(path.join(PATHS.src, 'styles'));
 });
 
 gulp.task('default', function() {

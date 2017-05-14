@@ -114,21 +114,18 @@ styles, watchの二箇所のタスクで同じファイルパスを指定しま�
     ```
 
 1. `PATHS`をタスクに適用してみる
-   ここはオシャレにES6の記法を使っちゃいます。
 
     ```js
     gulp.task('styles', function() {
-      return gulp.src(`${PATHS.src}/styles/**/*.scss`)
+      return gulp.src(path.join(PATHS.src, 'styles/**/*.scss'))
         .pipe(sass().on('error', sass.logError))
         .pipe(gulp.dest(`${PATHS.dist}/styles`));
     });
 
     gulp.task('watch', ['styles'], function() {
-      gulp.watch(`${PATHS.src}/styles/**/*.scss`, ['styles']);
+      gulp.watch(path.join(PATHS.src, 'styles'));
     });
 
-    // 📝 古い記事の場合は下のような書き方をよくみます。
-    gulp.src(path.join(PATHS.src, '/styles/**/*.scss'))
     ```
 
 ## ローカルサーバーを起動する
@@ -136,13 +133,19 @@ styles, watchの二箇所のタスクで同じファイルパスを指定しま�
 本レッスンの最後はローカルサーバーの起動です。
 Gulp等のタスクランナーが面白い！と感じてもらうために
 Browsersyncを使ってみます。
+
 Browsersyncを使うと、ローカルサーバーだけでなく、
 変更ごとにブラウザの自動リロードや、
 あるページを複数のブラウザで開いた場合に、
 一つの画面での変更が他画面でも同期されます。
+
+今回は公式ドキュメントを参考にgulpとBrowsersyncの連携を行います。
+https://www.browsersync.io/docs/gulp
 
 1. Browsersyncをインストール
 
     ```sh
     $ yarn add -D browser-sync
     ```
+
+2.

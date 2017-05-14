@@ -148,4 +148,18 @@ https://www.browsersync.io/docs/gulp
     $ yarn add -D browser-sync
     ```
 
-2.
+1. BrowserSyncの動作確認のためにhtmlファイルを準備しておく
+
+1. browserSyncの読み込みとサーバー用タスク`serve`を用意する
+
+    ```js
+    // requireで読み込む
+    const browserSync = require('browserSync');
+
+    // Static Server
+    gulp.task('serve', function() {
+
+    });
+    ```
+
+1. taskの中身をかく

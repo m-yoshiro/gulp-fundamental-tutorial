@@ -4,6 +4,7 @@
 const gulp = require('gulp');
 const sass = require('gulp-sass');
 const path = require('path');
+const browserSync = require('browser-sync').create();
 
 // src,distディレクトリをまとめて管理
 const PATHS = {
@@ -17,13 +18,24 @@ gulp.task('test:dirname', function () {
 })
 
 gulp.task('styles', function() {
-  return gulp.src(path.join(PATHS.src, 'styles/**/*.scss'))
+  return gulp.src(`${PATHS.src}/styles/**/*.scss`)
     .pipe(sass().on('error', sass.logError))
     .pipe(gulp.dest(`${PATHS.dist}/styles`));
 });
 
 gulp.task('watch', ['styles'], function() {
-  gulp.watch(path.join(PATHS.src, 'styles'));
+  gulp.watch(`${PATHS.src}/styles/**/*.scss`, 'styles');
+});
+
+// Static Server
+gulp.task('serve', function() {
+
+  browserSync.init({
+    server: './',
+  });
+
+  gulp.watch(`${PATHS.src}/styles/**/*.scss`, ['styles']);
+  gulp.watch(path.resolve(__dirname, '*.html')).on('change', browserSync.reload);
 });
 
 gulp.task('default', function() {

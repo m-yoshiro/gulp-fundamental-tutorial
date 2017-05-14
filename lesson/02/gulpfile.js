@@ -20,7 +20,8 @@ gulp.task('test:dirname', function () {
 gulp.task('styles', function() {
   return gulp.src(`${PATHS.src}/styles/**/*.scss`)
     .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest(`${PATHS.dist}/styles`));
+    .pipe(gulp.dest(`${PATHS.dist}/styles`))
+    .pipe(browserSync.stream());
 });
 
 gulp.task('watch', ['styles'], function() {
@@ -28,13 +29,17 @@ gulp.task('watch', ['styles'], function() {
 });
 
 // Static Server
-gulp.task('serve', function() {
+gulp.task('serve', ['styles'], function() {
 
+  // サーバーの設定を{}の中に書く
   browserSync.init({
+    // サーバーのルートディレクトリを指定
     server: './',
   });
 
+  // watchタスクと全く同じ
   gulp.watch(`${PATHS.src}/styles/**/*.scss`, ['styles']);
+  // htmlが`change`された時にページをリロードする
   gulp.watch(path.resolve(__dirname, '*.html')).on('change', browserSync.reload);
 });
 

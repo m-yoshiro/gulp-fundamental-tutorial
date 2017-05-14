@@ -142,6 +142,8 @@ Browsersyncを使うと、ローカルサーバーだけでなく、
 今回は公式ドキュメントを参考にgulpとBrowsersyncの連携を行います。
 https://www.browsersync.io/docs/gulp
 
+### 準備
+
 1. Browsersyncをインストール
 
     ```sh
@@ -154,7 +156,7 @@ https://www.browsersync.io/docs/gulp
 
     ```js
     // requireで読み込む
-    const browserSync = require('browserSync');
+    const browserSync = require('browser-sync');
 
     // Static Server
     gulp.task('serve', function() {
@@ -162,4 +164,68 @@ https://www.browsersync.io/docs/gulp
     });
     ```
 
-1. taskの中身をかく
+### taskの中身をかく
+
+    ```js
+    // Static Server
+    gulp.task('serve',function() {
+
+      // サーバーの設定を{}の中に書く
+      browserSync.init({
+        // サーバーのルートディレクトリを指定
+        server: './',
+      });
+
+      // htmlが`change`された時にページをリロードする
+      gulp.watch(path.resolve(__dirname, '*.html')).on('change', browserSync.reload);
+    });
+    ```
+
+### `gulp serve` を実行しましょう！  
+
+サーバーが起動したらブラウザが自動で立ち上がります。
+htmlを変更すると自動でリロードされます。
+
+    ```sh
+    $ gulp serve
+
+    # 実行後
+
+    [14:25:58] Starting 'serve'...
+    [14:25:58] Finished 'serve' after 20 ms
+    [BS] Access URLs:
+     ----------------------------------
+           Local: http://localhost:3000
+        External: http://10.0.1.3:3000
+     ----------------------------------
+              UI: http://localhost:3001
+     UI External: http://10.0.1.3:3001
+     ----------------------------------
+    [BS] Serving files from: ./
+    ```
+
+### 'scss'の変更時にも自動リロードを行うようにする
+
+1. serveタスクの実行前に`styles`タスクを実行するようにする
+1. `styles`タスク内にbrowserSyncのリロード用のコードを追加する
+
+    ```diff
+    // Static Server
+    + gulp.task('serve', ['styles'], function() {
+
+      // サーバーの設定を{}の中に書く
+      browserSync.init({
+        // サーバーのルートディレクトリを指定
+        server: './',
+      });
+
+    +  // watchタスクと全く同じ
+    +  gulp.watch(`${PATHS.src}/styles/**/*.scss`, ['styles']);
+      // htmlが`change`された時にページをリロードする
+      gulp.watch(path.resolve(__dirname, '*.html')).on('change', browserSync.reload);
+    });
+    ```
+
+### 実行しましょう！
+
+html, scssの変更に合わせてページがリロードされるはず。

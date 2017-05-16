@@ -122,7 +122,7 @@ https://github.com/gulpjs/gulp/blob/master/docs/API.md#gulpwatchglob--opts-tasks
     gulp.task('styles', function() {
       return gulp.src(path.join(PATHS.src, 'styles', '**/*.scss'))
         .pipe(sass().on('error', sass.logError))
-        .pipe(path.join(PATHS.dist, 'styles'));
+        .pipe(gulp.dest(path.join(PATHS.dist, 'styles')));
     });
 
     gulp.task('watch', ['styles'], function() {

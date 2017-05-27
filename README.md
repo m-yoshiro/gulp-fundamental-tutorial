@@ -22,6 +22,8 @@
 
 ### Lesson 3
 
+[lesson/03](lesson/03)
+
 - sass以外のtaskを追加してみよう
    - stylelint
    - autoprefixer

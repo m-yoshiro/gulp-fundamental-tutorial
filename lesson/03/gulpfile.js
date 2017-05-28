@@ -5,6 +5,8 @@ const gulp = require('gulp');
 const sass = require('gulp-sass');
 const path = require('path');
 const browserSync = require('browser-sync').create();
+const stylelint = require('gulp-stylelint');
+const autoprefixer = require('gulp-autoprefixer');
 
 // src,distディレクトリをまとめて管理
 const PATHS = {
@@ -42,6 +44,26 @@ gulp.task('serve', ['styles'], function() {
   // htmlが`change`された時にページをリロードする
   gulp.watch(path.join(__dirname, '*.html')).on('change', browserSync.reload);
 });
+
+// Lint
+gulp.task('lint:style', function () {
+  return gulp.src(path.join(PATHS.src, 'styles', '**/*.scss'))
+    .pipe(stylelint({
+      reporters: [
+        {formatter: 'string', console: true}
+      ]
+    }));
+});
+
+// Nunjucks
+gulp.task('nunjucks', function() {
+  return gulp.src(`${PATHS.src}/templates/*.html`)
+    .pipe(nunjucks({
+      path: [`${PATHS.src}/templates/`]
+    }))
+    .pipe(gulp.dest('dist'));
+});
+
 
 gulp.task('default', function() {
   console.log('Hellow Gulp!');

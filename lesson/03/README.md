@@ -1,234 +1,153 @@
-# Lesson 2
+# Lesson 3
 
 **できるようになること**
 
-- ファイルの変更を監視して自動でtaskを実行する
-- ディレクトリ管理を一箇所にまとめよう
-- ローカルサーバーを起動する
-   - Browsersync
+- sass以外のtaskを追加してみよう
+   - stylelint
+   - autoprefixer
+- HTMLテンプレートエンジンnunjucksを使ってhtmlを作ってみる
 
-## ファイルの変更を監視して自動でtaskを実行する
+## sass以外のtaskを追加してみよう
 
-Gulpの標準機能である`gulp.watch`を使います。
-これを利用すると、ファイルが変更(*)されたタイミングに任意のタスクを自動で
-実行することが可能となります。
+gulpはsassのbuild以外にも様々なタスクを作成することが可能です。
+今回は業務で触れる機会の多いこの2つをgulpのタスクで実行します。
 
-📝 ファイルの変更: ここでは、「エディタで保存されたタイミング」と考えてください
+**stylelint**
 
-gulp.watchドキュメント  
+https://stylelint.io/
+https://github.com/olegskl/gulp-stylelint
 
-https://github.com/gulpjs/gulp/blob/master/docs/API.md#gulpwatchglob--opts-tasks-or-gulpwatchglob--opts-cb
+- CSSの構文チェックツール。構文エラーだけでなくコーディングルールもチェックできる。
+- カスタマイズできる（エラー時に日本語コメ入れたり、プロジェクト独自のルール追加したり）
+
+**autoprefixer**
+
+https://autoprefixer.github.io/
+https://www.npmjs.com/package/gulp-autoprefixer
+
+- ブラウザによって異なるCSSのプレフィックスを自動で追加してくれます。
 
 ### 準備
 
-1. watchタスクを作成する
-   sassの時と同じように、まずは空の`watch`taskを作成します。
-
-    ```js
-    gulp.task('watch', function () {
-      // ...
-    });
-    ```
-
-1. taskの内容を書く
-   こんだけ！  
-   `gulp.watch('{{ 監視したいファイルのパス }}', ['{{ 実行したいタスク名 }}', '...'])`
-
-    ```js
-    gulp.task('watch', function () {
-      // scssのファイルが変更されたタイミングに`styles`が実行される
-      gulp.watch('./src/styles/**/*.scss', ['styles']);
-    });
-    ```
-
-1. 実行
-   `gulp watch`を実行します。
-   実行後はscssファイルが変更されると自動で`styles`タスクが実行されます。
+1. toolをインストール
 
     ```sh
-    $ gulp watch
-
-    # 実行結果
-    [16:56:31] Using gulpfile ~/Works/Private/gulp-tutorial/lesson/02/gulpfile.js
-    [16:56:31] Starting 'watch'...
-    [16:56:31] Finished 'watch' after 12 ms
+    $ yarn add -D gulp-stylelint gulp-autoprefixer
     ```
 
-1. おまけ: `gulp watch`実行時に1度`styles`タスクを実行させる
-   今のままでは、watchタスク実行してもファイルが変更されるまで`styles`タスクが実行されません。
-   functionの前に `['styles']` を追加すると  
-   watch実行後すぐに`styles`タスクが実行されます。
+1. 空のlint:styleタスクを作成する
 
-   ```js
-    gulp.task('watch', ['styles'], function () {
-      gulp.watch('./src/styles/**/*.scss', ['styles']);
+    ```js
+    const stylelint = require('gulp-stylelint');
+    const autoprefixer = require('gulp-autoprefixer');
+
+    // ...
+
+    gulp.task('lint:style', function () {
+      // ...
     });
+
+    ```
+
+### Stylelint
+
+1. taskの内容を書く
+
+    ```js
+    gulp.task('lint:style', function () {
+      return gulp.src(path.join(PATHS.src, 'styles', '**/*.scss'))
+        .pipe(stylelint({
+          // 実行結果の出力方法を設定してる
+          reporters: [
+            {formatter: 'string', console: true}
+          ]
+        }));
+    });
+    ```
+
+1. 設定ファイル`.stylelintrc`を追加
+   `gulp lint:style`を実行するとおそらくエラーが出るでしょう。
+   これは、stylelintの設定が十分ではないためです。
+   設定ファイル`.stylelintrc`をgulpfileと同じディレクトリに作成して
+   以下ページのコードブロックの内容をコピペしてください
+
+   https://stylelint.io/user-guide/configuration/#rules
+
+1. `gulp lint:style`を実行しましょう。
+   header.scssでErrorが発見されたら成功です。
+
+   ```sh
+   src/styles/_header.scss
+   2:3  ✖  Expected indentation of 1 tab   indentation
    ```
 
-## ディレクトリ管理を一箇所にまとめよう
+### Autoprefixer
 
-読み込み元・書き出し先の二つのディレクトリを
-一箇所で管理しましょう。
+これまでtoolを追加する際は、新たにタスクを書いてきましたが、
+今回は既にある`styles`タスク内にコードを追加して、この中で実行するようにします。
 
-こうしておくと、読み込み元のディレクトリを変更したい場合、
-ディレクトリ管理する一箇所のみを修正すれば対応できるようになります。
+1. Autoprefixerのコードを追加する
+   sass()より前に追加します。sassの後ろだと処理が遅くなります。
+   autoprefixerの中には対象ブラウザを設定します。
 
-ここでは、連想配列を利用します。
-
-1. モジュール`path`をrequirする
-   ファイルパスの参照に便利な機能を持ったツールです。
-   node.jsに標準で備わっています。
-
-    ```js
-    const gulp = require('gulp');
-    const sass = require('gulp-sass');
-    // こいつを追加
-    const path = require('path');
-    ```
-
-1. ファイル管理のための変数 `PATHS` を定義
-
-    ```js
-    const PATHS = {};
-
-    // 📝 複数のパスを管理するので変数名を複数形で表しています。
-    // 欧米圏だと単数・複数形の違いはとても重要なようで,
-    // 実際に同一単語の単数・複数が機能によって使い分けられてるケースは少なくないです。
-    // 慣れておくと今後良いです。
-    ```
-
-1. `path`モジュールと`__dirname`を持ちいてファイルパスを指定する
-   今回は読み込み元と出力先の2つのパスを指定します。
-
-    ```js
-    // `__dirname`はnodejsの特別な変数で、実行中の環境での絶対パスを表します。
-    // `path.join()`は()内に記されたディレクトリ名を連結して一つのパスを表します。
-
-    const PATHS = {
-      src: path.join(__dirname, 'src'),
-      dist: path.join(__dirname, 'dist'),
-    }
-
-    // 📝 dirnameの役割を示すためのテスト
-    // `gulp test:dirname` でdirnameの中のファイルパスが確認できます
-    gulp.task('test:dirname', function () {
-      console.log('dirname is' + __dirname);
-    })
-    ```
-
-1. `PATHS`をタスクに適用してみる
+   📝 びっくりするほど細かいブラウザ設定が可能です。(アメリカでのIEでユーザーが1%以上のバージョン、とか)
+   詳しくは https://github.com/ai/browserslist
 
     ```js
     gulp.task('styles', function() {
       return gulp.src(path.join(PATHS.src, 'styles', '**/*.scss'))
+        // sass()より前に追加する
+        .pipe(autoprefixer({
+            // lintの時と同じく設定。
+            browsers: ['last 2 versions'],
+            cascade: false
+        }))
         .pipe(sass().on('error', sass.logError))
-        .pipe(gulp.dest(path.join(PATHS.dist, 'styles')));
-    });
-
-    gulp.task('watch', ['styles'], function() {
-      gulp.watch(path.join(PATHS.src, 'styles'));
+        .pipe(gulp.dest(path.join(PATHS.dist, 'styles')))
+        .pipe(browserSync.stream());
     });
 
     ```
 
-## ローカルサーバーを起動する
+2. Autoprefixerの効果を試してみましょう
+   例えば`display: flex;`をscssに書いて stylesタスクを実行
 
-本レッスンの最後はローカルサーバーの起動です。
-Gulp等のタスクランナーが面白い！と感じてもらうために
-Browsersyncを使ってみます。
+    ```scss
+    .aaa {
+      display: flex;
+    }
 
-Browsersyncを使うと、ローカルサーバーだけでなく、
-変更ごとにブラウザの自動リロードや、
-あるページを複数のブラウザで開いた場合に、
-一つの画面での変更が他画面でも同期されます。
+    // こうなる
 
-今回は公式ドキュメントを参考にgulpとBrowsersyncの連携を行います。
-https://www.browsersync.io/docs/gulp
-
-### 準備
-
-1. Browsersyncをインストール
-
-    ```sh
-    $ yarn add -D browser-sync
+    .aaa {
+      display: -webkit-flex;
+      display: -ms-flex;
+      display: flex;
+    }
     ```
 
-1. BrowserSyncの動作確認のためにhtmlファイルを準備しておく
+## HTMLテンプレートエンジンnunjucksを使ってhtmlを作ってみる
 
-1. browserSyncの読み込みとサーバー用タスク`serve`を用意する
+最後にHTMLテンプレートエンジンnunjucksを使ってみましょう。  
+nunjucksは、例えばcssに対してのsassのようにHTMLを便利に書くことができるツールです。
+
+https://mozilla.github.io/nunjucks/
+
+1. toolインストールとtaskの準備
+   `yarn add -D gulp-nunjucks-render` してから
 
     ```js
-    // requireで読み込む
-    const browserSync = require('browser-sync');
+    const nunjucks = require('gulp-nunjucks-render');
 
-    // Static Server
-    gulp.task('serve', function() {
+    gulp.task('nunjucks', function() {
 
     });
     ```
 
-### taskの中身をかく
+1. タスクをかく
 
     ```js
-    // Static Server
-    gulp.task('serve',function() {
+    gulp.task('nunjucks', function() {
 
-      // サーバーの設定を{}の中に書く
-      browserSync.init({
-        // サーバーのルートディレクトリを指定
-        server: './',
-      });
-
-      // htmlが`change`された時にページをリロードする
-      gulp.watch(path.resolve(__dirname, '*.html')).on('change', browserSync.reload);
     });
     ```
-
-### 実行しましょう！  
-
-サーバーが起動したらブラウザが自動で立ち上がります。
-htmlを変更すると自動でリロードされます。
-
-    ```sh
-    $ gulp serve
-
-    # 実行後
-
-    [14:25:58] Starting 'serve'...
-    [14:25:58] Finished 'serve' after 20 ms
-    [BS] Access URLs:
-     ----------------------------------
-           Local: http://localhost:3000
-        External: http://10.0.1.3:3000
-     ----------------------------------
-              UI: http://localhost:3001
-     UI External: http://10.0.1.3:3001
-     ----------------------------------
-    [BS] Serving files from: ./
-    ```
-
-### html以外の変更でも自動リロードを実行する
-
-1. serveタスクの実行前に`styles`タスクを実行するようにする
-1. `styles`タスク内にbrowserSyncのリロード用のコードを追加する
-
-    ```diff
-    // Static Server
-    + gulp.task('serve', ['styles'], function() {
-
-      // サーバーの設定を{}の中に書く
-      browserSync.init({
-        // サーバーのルートディレクトリを指定
-        server: './',
-      });
-
-    +  // watchタスクと全く同じ
-    +  gulp.watch(path.join(PATHS.src, 'styles', '**/*.scss'), ['styles']);
-      // htmlが`change`された時にページをリロードする
-      gulp.watch(path.resolve(__dirname, '*.html')).on('change', browserSync.reload);
-    });
-    ```
-
-### 実行しましょう！
-
-html, scssの変更に合わせてページがリロードされるはず。
